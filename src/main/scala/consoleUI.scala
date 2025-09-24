@@ -1,7 +1,17 @@
-import scala.io.StdIn.readLine
+package rocketbuilder
 
-@main def consoleUI(): Unit =
-  val banner =
+import scala.io.StdIn.readLine
+import rocketbuilder._
+
+// ------------------------------------
+// AstroCLI - Beyond Horizons
+// ------------------------------------
+
+class ConsoleUI:
+
+  private var running: Boolean = true
+
+  private val banner: String =
     """|
        |   ░███                  ░██                          ░██████  ░██         ░██████
        |  ░██░██                 ░██                         ░██   ░██ ░██           ░██
@@ -14,27 +24,28 @@ import scala.io.StdIn.readLine
        |<―――――――――――――――――――――――――――――――――――――――――――――――――――>
        |""".stripMargin
 
-  println(banner)
+  def start(): Unit =
+    println(banner)
 
-  println("What do you want to do?")
+    // Do in mainloop
+    while running do
+      println("\nAvailable Options:")
+      println("1) List all rockets")
+      println("2) Add a new rocket")
+      println("3) Calculate flight time")
+      println("4) Save rockets to file")
+      println("5) Load rockets from file")
+      println("0) Exit")
 
-  println("\nAvailable Options:")
-  println("1) List all rockets")
-  println("2) Add a new rocket")
-  println("3) Calculate flight Time")
-  println("4) Save rockets to file")
-  println("5) Load rockets from file")
-  println("0) Exit")
+      val option = readLine("Choose an option: ").toIntOption.getOrElse(-1)
 
-  val option = readLine()
-
-  option match {
-    case 0 => listRocket()
-    case 1 => addRocket()
-    case 3 => calculateFlight()
-    case 4 => saveRockets()
-    case 5 => loadRockets()
-    case _ => println("Invalid Option")
-  }
-
-
+      option match
+        case 0 =>
+          println("Exiting…")
+          running = false
+        case 1 => RocketManager.listRockets()
+        // case 2 => RocketManager.addRocket(Rocket)
+        // case 3 => RocketManager.calculateFlight()
+        // case 4 => RocketManager.saveRockets()
+        // case 5 => RocketManager.loadRockets()
+        case _ => println("Invalid option")
