@@ -91,17 +91,15 @@ object RocketManager:
   // Core methods
   // --------------------
 
-  def addRocket(rocket: Rocket): Unit =
+  def addRocket(rocket: Rocket): Seq[Rocket] =
     rockets = rockets :+ rocket
-    println(s"✅ Rocket '${rocket.name}' added successfully!")
+    rockets
 
-  def listRockets(): Unit =
+  def listRockets(): Seq[String] =
     if rockets.isEmpty then
-      println("❌ No rockets available.")
+      Seq.empty
     else
-      rockets.foreach { r =>
-        println(
-          s"ID: ${r.rID}, Name: ${r.name}, Dry Mass: ${r.dryMassKg} kg, " +
-            s"Fuel: ${r.fuelMassKg} kg, Total: ${r.totalMass} kg"
-        )
+      rockets.map { r =>
+        s"ID: ${r.rID}, Name: ${r.name}, Dry Mass: ${r.dryMassKg} kg, " +
+          s"Fuel: ${r.fuelMassKg} kg, Total: ${r.totalMass} kg"
       }
