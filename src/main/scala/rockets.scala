@@ -86,7 +86,6 @@ object RocketManager:
     )
   )
 
-
   // --------------------
   // Core methods
   // --------------------
@@ -100,6 +99,24 @@ object RocketManager:
       Seq.empty
     else
       rockets.map { r =>
-        s"ID: ${r.rID}, Name: ${r.name}, Dry Mass: ${r.dryMassKg} kg, " +
-          s"Fuel: ${r.fuelMassKg} kg, Total: ${r.totalMass} kg"
+        val partLines =
+          if r.parts.nonEmpty then r.parts.map(p => s"   - ${p.name} (${p.massKg} kg)").mkString("\n")
+          else "   (No Parts)"
+
+        s"""|ID: ${r.rID}
+            |Name: ${r.name}
+            |Parts:
+            |$partLines
+            |Dry Mass: ${r.dryMassKg} kg
+            |Fuel: ${r.fuelMassKg} kg
+            |Total Mass: ${r.totalMass} kg
+            |-----------------------------------""".stripMargin
       }
+
+  def getAllRockets(): Seq[Rocket] = rockets
+
+  def findRocket(id: Int): Option[Rocket] =
+    rockets.find(_.rID == id)
+
+  def updateRocket(updated: Rocket): Unit =
+    rockets = rockets.map(r => if r.rID == updated.rID then updated else r)
