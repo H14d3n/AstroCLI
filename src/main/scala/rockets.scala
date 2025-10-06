@@ -3,6 +3,7 @@ package rocketbuilder
 import java.io._
 import java.nio.file.{Files, Paths}
 import scala.util.Try
+import upickle.default._
 
 // ------------------------------------
 // Rocket Parts & Categories
@@ -120,3 +121,26 @@ object RocketManager:
 
   def updateRocket(updated: Rocket): Unit =
     rockets = rockets.map(r => if r.rID == updated.rID then updated else r)
+
+  // -------------------------------------------------
+  // Save / Load to JSON
+  // -------------------------------------------------
+  given ReadWriter[PartCategory] = readwriter[String].bimap[PartCategory](_.toString, PartCategory.valueOf)
+  given ReadWriter[RocketPart] = macroRW
+  given ReadWriter[Rocket] = macroRW
+
+  def saveRockets(): Boolean =
+    Try {
+      val json = write(rockets, indent = 2)
+      Files.writeString(Paths.get(dataFile), json)
+    }.isSuccess
+
+  def loadRockets(): Boolean =
+    val path = Paths.get(dataFile)
+    if Files.exists(path) then
+      Try {
+        val json = Files.readString(path)
+        rockets = read[Seq[Rocket]](json)
+      }.isSuccess
+    else
+      false

@@ -34,7 +34,7 @@ class ConsoleUI:
         |░██    ░██        ░██    ░██    ░██      ░██    ░██  ░██   ░██ ░██           ░██
         |░██    ░██  ░███████      ░████ ░██       ░███████    ░██████  ░██████████ ░██████
         |
-        |${RESET}<―――――――――――――――――――――――――――――――――――――――――――――――――――>${RESET}
+        |${YELLOW}<―――――――――――――――――――――――――――――――――――――――――――――――――――>${RESET}
         |""".stripMargin
 
   def start(): Unit =
@@ -139,36 +139,70 @@ class ConsoleUI:
 
   def startExpeditionInit(): Unit =
     println(s"\n${GREEN}${INVERT} EXPEDITION LAUNCH MODULE ${RESET}")
-    val rockets = RocketManager.getAllRockets()
-    if rockets.isEmpty then
-      println(s"${GREEN}NO ROCKETS AVAILABLE.${RESET}")
-    else
-      rockets.foreach(r => println(s"${GREEN}ID: ${r.rID}, Name: ${r.name}${RESET}"))
+      val rockets = RocketManager.getAllRockets()
+      if rockets.isEmpty then
+        println(s"${GREEN}NO ROCKETS AVAILABLE.${RESET}")
+      else
+        // List available rockets
+        rockets.foreach(r => println(s"${GREEN}ID: ${r.rID}, Name: ${r.name}${RESET}"))
 
-      val id = readLine(s"${GREEN}ENTER ROCKET ID TO LAUNCH > ${RESET}")
-        .toIntOption.getOrElse(-1)
+        val id = readLine(s"${GREEN}ENTER ROCKET ID TO LAUNCH > ${RESET}")
+          .toIntOption.getOrElse(-1)
 
-      RocketManager.findRocket(id) match
-        case Some(rocket) =>
-          val hasAllCategories = PartCategory.values.forall(cat =>
-            rocket.parts.exists(_.category == cat)
-          )
-          if hasAllCategories then
-            println(s"${GREEN}EXPEDITION SUCCESS! Rocket '${rocket.name}' has launched.${RESET}")
-          else
-            println(s"${GREEN}EXPEDITION FAILED. '${rocket.name}' is missing required parts from one or more categories.${RESET}")
+        RocketManager.findRocket(id) match
+          case Some(rocket) =>
+            val hasAllCategories = PartCategory.values.forall(cat =>
+              rocket.parts.exists(_.category == cat)
+            )
 
-        case None =>
-          println(s"${GREEN}ROCKET WITH ID $id NOT FOUND.${RESET}")
+            if !hasAllCategories then
+              println(
+                s"""
+                  |${YELLOW}${INVERT} EXPEDITION ABORTED ${RESET}
+                  |Rocket '${rocket.name}' is missing one or more required component categories.
+                  |
+                  |Required categories:
+                  | - ${PartCategory.values.mkString(", ")}
+                  |
+                  | Ensure your rocket has exactly one part from each before launching.
+                  |""".stripMargin
+              )
+            else
+              // Proceed to planet selection
+              println(s"\n${GREEN}${INVERT} DESTINATION SELECTION ${RESET}")
+              PlanetData.allPlanets.foreach(p =>
+                println(s"${GREEN}[${p.pID}] ${p.name} — Distance: ${p.distanceToEarth} million km${RESET}")
+              )
+              val pChoice = readLine(s"${GREEN}ENTER PLANET ID > ${RESET}")
+                .toIntOption.getOrElse(-1)
 
+              PlanetData.allPlanets.find(_.pID == pChoice) match
+                case Some(planet) =>
+                  println(s"${GREEN}Launching expedition simulation...${RESET}")
+                  Thread.sleep(700)
+
+                  val result = ExpeditionCalculator.simulateExpedition(rocket, planet)
+                  println(s"${GREEN}${result.report}${RESET}")
+
+                case None =>
+                  println(s"${GREEN}INVALID PLANET SELECTION.${RESET}")
+
+          case None =>
+            println(s"${GREEN}ROCKET WITH ID $id NOT FOUND.${RESET}")
 
   def saveRocketsInit(): Unit =
     println(s"\n${GREEN}${INVERT} DATA STORAGE ${RESET}")
-    println(s"${GREEN}SAVE FUNCTIONALITY NOT IMPLEMENTED.${RESET}")
+    if RocketManager.saveRockets() then
+      println(s"${GREEN}Rocket fleet saved successfully to 'rockets.json'.${RESET}")
+    else
+      println(s"${GREEN}Error: Failed to save rocket data.${RESET}")
 
   def loadRocketsInit(): Unit =
     println(s"\n${GREEN}${INVERT} DATA RETRIEVAL ${RESET}")
-    println(s"${GREEN}LOAD FUNCTIONALITY NOT IMPLEMENTED.${RESET}")
+    if RocketManager.loadRockets() then
+      println(s"${GREEN}Rocket fleet loaded from 'rockets.json'.${RESET}")
+    else
+      println(s"${GREEN}No data found or failed to load file.${RESET}")
 
 
   def selectParts(): Seq[RocketPart] =

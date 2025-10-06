@@ -1,0 +1,35 @@
+[
+  {
+    "rID": 619,
+    "name": "VoyagerAltered",
+    "parts": [
+      {
+        "name": "Small Payload Fairing",
+        "massKg": 800,
+        "category": "Payload"
+      },
+      {
+        "name": "Basic Avionics",
+        "massKg": 500,
+        "category": "Control"
+      },
+      {
+        "name": "Lightweight Airframe",
+        "massKg": 8000,
+        "category": "Structure"
+      },
+      {
+        "name": "Engine - Merlin",
+        "massKg": 4700,
+        "category": "Propulsion"
+      },
+      {
+        "name": "Small Fuel Tank (empty)",
+        "massKg": 2000,
+        "category": "Tanks"
+      }
+    ],
+    "fuelMassKg": 1000000,
+    "maxSpeed": 0
+  }
+]
