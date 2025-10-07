@@ -111,7 +111,7 @@ object RocketManager:
             |Dry Mass: ${r.dryMassKg} kg
             |Fuel: ${r.fuelMassKg} kg
             |Total Mass: ${r.totalMass} kg
-            |-----------------------------------""".stripMargin
+            |――――――――――――――――――――""".stripMargin
       }
 
   def getAllRockets(): Seq[Rocket] = rockets

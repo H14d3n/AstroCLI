@@ -1,7 +1,7 @@
 [
   {
     "rID": 619,
-    "name": "VoyagerAltered",
+    "name": "Falcon 9",
     "parts": [
       {
         "name": "Small Payload Fairing",
@@ -29,7 +29,40 @@
         "category": "Tanks"
       }
     ],
-    "fuelMassKg": 1000000,
+    "fuelMassKg": 986061.6,
+    "maxSpeed": 0
+  },
+  {
+    "rID": 3226,
+    "name": "Ariane 5",
+    "parts": [
+      {
+        "name": "Crew Capsule",
+        "massKg": 3000,
+        "category": "Payload"
+      },
+      {
+        "name": "Advanced Avionics",
+        "massKg": 900,
+        "category": "Control"
+      },
+      {
+        "name": "Landing Legs (Heavy)",
+        "massKg": 2500,
+        "category": "Structure"
+      },
+      {
+        "name": "Engine - Solid Booster",
+        "massKg": 3000,
+        "category": "Propulsion"
+      },
+      {
+        "name": "Medium Fuel Tank (empty)",
+        "massKg": 3000,
+        "category": "Tanks"
+      }
+    ],
+    "fuelMassKg": 100000,
     "maxSpeed": 0
   }
 ]

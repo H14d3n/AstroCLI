@@ -178,10 +178,14 @@ class ConsoleUI:
 
               PlanetData.allPlanets.find(_.pID == pChoice) match
                 case Some(planet) =>
-                  println(s"${GREEN}Launching expedition simulation...${RESET}")
+                  println(s"${GREEN}\nLaunching expedition simulation...${RESET}")
                   Thread.sleep(700)
 
                   val result = ExpeditionCalculator.simulateExpedition(rocket, planet)
+                  // Update rocket’s fuel to reflect remaining fuel
+                  val updatedRocket = rocket.copy(fuelMassKg = result.remainingFuel)
+                  RocketManager.updateRocket(updatedRocket)
+
                   println(s"${GREEN}${result.report}${RESET}")
 
                 case None =>
@@ -211,7 +215,7 @@ class ConsoleUI:
     println(s"\n${GREEN}${INVERT} PARTS SELECTION MODULE ${RESET}")
 
     for (category <- PartCategory.values) {
-      println(s"\n${GREEN}--- ${category} ---${RESET}")
+      println(s"\n${GREEN}―― ${category} ――${RESET}")
       val parts = RocketManager.availableParts(category)
       parts.zipWithIndex.foreach { case (p, idx) =>
         println(s"${GREEN}[${idx + 1}] ${p.name} (${p.massKg} kg)")

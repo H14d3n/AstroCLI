@@ -88,7 +88,7 @@ object ExpeditionCalculator:
       val status = if success then "SUCCESSFUL" else "FAILED"
       f"""
          |🚀 Expedition Report
-         |----------------------------
+         |――――――――――――――――――
          |Rocket: ${rocket.name}
          |Destination: ${planet.name}
          |Distance: ${planet.distanceToEarth} million km
@@ -97,5 +97,5 @@ object ExpeditionCalculator:
          |Fuel Remaining: ${remainingFuel}%.1f kg
          |Travel Time: ${days}%.2f days
          |Status: $status
-         |----------------------------
+         |――――――――――――――――――
          |""".stripMargin
