@@ -50,10 +50,11 @@ AstroCLI/
 ```
 [1] List Rocket Fleet
 [2] Register New Rocket
-[3] Edit Rocket
-[4] Start Expedition
-[5] Save Fleet to File
-[6] Load Fleet from File
+[3] Remove Rocket
+[4] Edit Rocket
+[5] Start Expedition
+[6] Save Fleet to File
+[7] Load Fleet from File
 [0] Shutdown Terminal
 ```
 
