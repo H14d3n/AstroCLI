@@ -23,6 +23,11 @@ class ConsoleUI:
 
   import Term._
 
+  // Clear Screen helper
+  def clearScreen(): Unit =
+    print(s"${CLEAR}${HOME}")
+    Console.flush()
+
   private val banner: String =
     s"""|
         |${YELLOW}
@@ -38,33 +43,45 @@ class ConsoleUI:
         |""".stripMargin
 
   def start(): Unit =
+    clearScreen()
     println(banner)
 
     while running do
       println(s"${GREEN}\n${INVERT} SYSTEM MENU ${RESET}")
       println(s"${GREEN} [1] LIST ROCKET FLEET")
       println(s" [2] REGISTER NEW ROCKET")
-      println(s" [3] EDIT ROCKET")
-      println(s" [4] START EXPEDITION")
-      println(s" [5] SAVE FLEET TO FILE")
-      println(s" [6] LOAD FLEET FROM FILE")
+      println(s" [3] REMOVE ROCKET")
+      println(s" [4] EDIT ROCKET")
+      println(s" [5] START EXPEDITION")
+      println(s" [6] SAVE FLEET TO FILE")
+      println(s" [7] LOAD FLEET FROM FILE")
       println(s" [0] SHUTDOWN TERMINAL${RESET}")
 
       val option = readLine(s"\n${GREEN}COMMAND > ${RESET}").toIntOption.getOrElse(-1)
+      clearScreen()
 
       option match
         case 0 =>
           println(s"${GREEN}SYSTEM SHUTDOWN INITIATED... TERMINAL OFFLINE${RESET}")
           running = false
+
         case 1 => listRocketsInit()
         case 2 => addRocketInit()
-        case 3 => editRocketInit()
-        case 4 => startExpeditionInit()
-        case 5 => saveRocketsInit()
-        case 6 => loadRocketsInit()
+        case 3 => removeRocketInit()
+        case 4 => editRocketInit()
+        case 5 => startExpeditionInit()
+        case 6 => saveRocketsInit()
+        case 7 => loadRocketsInit()
         case _ => println(s"${GREEN}INVALID COMMAND. RETRY.${RESET}")
 
+      if running then
+        println(s"\n${YELLOW}Press ENTER to return to menu...${RESET}")
+        readLine()
+        clearScreen()
 
+  // ----------------------------
+  // Rocket listing
+  // ----------------------------
   def listRocketsInit(): Unit =
     val rockets = RocketManager.listRockets()
     println(s"\n${GREEN}${INVERT} ROCKET DATABASE ${RESET}")
@@ -73,25 +90,53 @@ class ConsoleUI:
     else
       rockets.foreach(r => println(s"${GREEN}> $r${RESET}"))
 
-
+  // ----------------------------
+  // Add Rocket
+  // ----------------------------
   def addRocketInit(): Unit =
     println(s"\n${GREEN}${INVERT} ROCKET REGISTRATION ${RESET}")
     val id = scala.util.Random.nextInt(10000)
     val name = readLine(s"${GREEN}ENTER ROCKET NAME > ${RESET}")
 
-    // ---- Select Parts ----
     val chosenParts = selectParts()
 
-    // ---- Fuel Input ----
     val fuel = readLine(s"${GREEN}ENTER FUEL MASS (KG) > ${RESET}")
       .toDoubleOption.getOrElse(0.0)
 
     val rocket = Rocket(id, name, chosenParts, fuelMassKg = fuel, maxSpeed = 0)
-
     RocketManager.addRocket(rocket)
-    println(s"${GREEN}\nROCKET '${rocket.name}' REGISTERED SUCCESSFULLY.\n${RESET}")
 
+    println(s"${GREEN}\nROCKET '${rocket.name}' REGISTERED SUCCESSFULLY.${RESET}")
 
+  // ----------------------------
+  // Remove Rocket
+  // ----------------------------
+  def removeRocketInit(): Unit =
+    println(s"\n${GREEN}${INVERT} ROCKET REMOVAL MODULE ${RESET}")
+
+    val rockets = RocketManager.getAllRockets()
+    if rockets.isEmpty then
+      println(s"${GREEN}NO ROCKETS AVAILABLE TO REMOVE.${RESET}")
+    else
+      rockets.foreach(r => println(s"${GREEN}ID: ${r.rID}, Name: ${r.name}${RESET}"))
+
+      val id = readLine(s"${GREEN}ENTER ROCKET ID TO REMOVE > ${RESET}")
+        .toIntOption.getOrElse(-1)
+
+      RocketManager.findRocket(id) match
+        case Some(rocket) =>
+          val confirm = readLine(s"${YELLOW}CONFIRM DELETE '${rocket.name}'? (y/n) > ${RESET}")
+          if confirm.toLowerCase == "y" then
+            RocketManager.removeRocket(id)
+            println(s"${GREEN}Rocket '${rocket.name}' removed from fleet.${RESET}")
+          else
+            println(s"${GREEN}Deletion cancelled.${RESET}")
+        case None =>
+          println(s"${GREEN}Rocket with ID $id not found.${RESET}")
+
+  // ----------------------------
+  // Edit Rocket
+  // ----------------------------
   def editRocketInit(): Unit =
     println(s"\n${GREEN}${INVERT} ROCKET EDITOR ${RESET}")
     val rockets = RocketManager.getAllRockets()
@@ -105,7 +150,7 @@ class ConsoleUI:
 
       RocketManager.findRocket(id) match
         case Some(rocket) =>
-          println(s"${GREEN}Editing '${rocket.name}'${RESET}")
+          println(s"${GREEN}\nEditing '${rocket.name}'${RESET}")
           println(s"[1] Change Name")
           println(s"[2] Change Fuel")
           println(s"[3] Change Parts")
@@ -136,64 +181,66 @@ class ConsoleUI:
         case None =>
           println(s"${GREEN}ROCKET WITH ID $id NOT FOUND.${RESET}")
 
-
+  // ----------------------------
+  // Expedition
+  // ----------------------------
   def startExpeditionInit(): Unit =
     println(s"\n${GREEN}${INVERT} EXPEDITION LAUNCH MODULE ${RESET}")
-      val rockets = RocketManager.getAllRockets()
-      if rockets.isEmpty then
-        println(s"${GREEN}NO ROCKETS AVAILABLE.${RESET}")
-      else
-        // List available rockets
-        rockets.foreach(r => println(s"${GREEN}ID: ${r.rID}, Name: ${r.name}${RESET}"))
+    val rockets = RocketManager.getAllRockets()
+    if rockets.isEmpty then
+      println(s"${GREEN}NO ROCKETS AVAILABLE.${RESET}")
+    else
+      rockets.foreach(r => println(s"${GREEN}ID: ${r.rID}, Name: ${r.name}${RESET}"))
 
-        val id = readLine(s"${GREEN}ENTER ROCKET ID TO LAUNCH > ${RESET}")
-          .toIntOption.getOrElse(-1)
+      val id = readLine(s"${GREEN}ENTER ROCKET ID TO LAUNCH > ${RESET}")
+        .toIntOption.getOrElse(-1)
 
-        RocketManager.findRocket(id) match
-          case Some(rocket) =>
-            val hasAllCategories = PartCategory.values.forall(cat =>
-              rocket.parts.exists(_.category == cat)
+      RocketManager.findRocket(id) match
+        case Some(rocket) =>
+          val hasAllCategories = PartCategory.values.forall(cat =>
+            rocket.parts.exists(_.category == cat)
+          )
+
+          if !hasAllCategories then
+            println(
+              s"""
+                 |${YELLOW}${INVERT} EXPEDITION ABORTED ${RESET}
+                 |Rocket '${rocket.name}' is missing one or more required component categories.
+                 |
+                 |Required categories:
+                 | - ${PartCategory.values.mkString(", ")}
+                 |
+                 |Ensure your rocket has exactly one part from each before launching.
+                 |""".stripMargin
             )
+          else
+            println(s"\n${GREEN}${INVERT} DESTINATION SELECTION ${RESET}")
+            PlanetData.allPlanets.foreach(p =>
+              println(s"${GREEN}[${p.pID}] ${p.name} — Distance: ${p.distanceToEarth} million km${RESET}")
+            )
+            val pChoice = readLine(s"${GREEN}ENTER PLANET ID > ${RESET}")
+              .toIntOption.getOrElse(-1)
 
-            if !hasAllCategories then
-              println(
-                s"""
-                  |${YELLOW}${INVERT} EXPEDITION ABORTED ${RESET}
-                  |Rocket '${rocket.name}' is missing one or more required component categories.
-                  |
-                  |Required categories:
-                  | - ${PartCategory.values.mkString(", ")}
-                  |
-                  | Ensure your rocket has exactly one part from each before launching.
-                  |""".stripMargin
-              )
-            else
-              // Proceed to planet selection
-              println(s"\n${GREEN}${INVERT} DESTINATION SELECTION ${RESET}")
-              PlanetData.allPlanets.foreach(p =>
-                println(s"${GREEN}[${p.pID}] ${p.name} — Distance: ${p.distanceToEarth} million km${RESET}")
-              )
-              val pChoice = readLine(s"${GREEN}ENTER PLANET ID > ${RESET}")
-                .toIntOption.getOrElse(-1)
+            PlanetData.allPlanets.find(_.pID == pChoice) match
+              case Some(planet) =>
+                println(s"${GREEN}\nLaunching expedition simulation...${RESET}")
+                Thread.sleep(700)
 
-              PlanetData.allPlanets.find(_.pID == pChoice) match
-                case Some(planet) =>
-                  println(s"${GREEN}\nLaunching expedition simulation...${RESET}")
-                  Thread.sleep(700)
+                val result = ExpeditionCalculator.simulateExpedition(rocket, planet)
+                val updatedRocket = rocket.copy(fuelMassKg = result.remainingFuel)
+                RocketManager.updateRocket(updatedRocket)
 
-                  val result = ExpeditionCalculator.simulateExpedition(rocket, planet)
-                  // Update rocket’s fuel to reflect remaining fuel
-                  val updatedRocket = rocket.copy(fuelMassKg = result.remainingFuel)
-                  RocketManager.updateRocket(updatedRocket)
+                println(s"${GREEN}${result.report}${RESET}")
 
-                  println(s"${GREEN}${result.report}${RESET}")
+              case None =>
+                println(s"${GREEN}INVALID PLANET SELECTION.${RESET}")
 
-                case None =>
-                  println(s"${GREEN}INVALID PLANET SELECTION.${RESET}")
+        case None =>
+          println(s"${GREEN}ROCKET WITH ID $id NOT FOUND.${RESET}")
 
-          case None =>
-            println(s"${GREEN}ROCKET WITH ID $id NOT FOUND.${RESET}")
-
+  // ----------------------------
+  // Save / Load
+  // ----------------------------
   def saveRocketsInit(): Unit =
     println(s"\n${GREEN}${INVERT} DATA STORAGE ${RESET}")
     if RocketManager.saveRockets() then
@@ -208,7 +255,9 @@ class ConsoleUI:
     else
       println(s"${GREEN}No data found or failed to load file.${RESET}")
 
-
+  // ----------------------------
+  // Part Selection
+  // ----------------------------
   def selectParts(): Seq[RocketPart] =
     var selectedParts: Seq[RocketPart] = Seq.empty
 

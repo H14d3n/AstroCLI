@@ -95,6 +95,9 @@ object RocketManager:
     rockets = rockets :+ rocket
     rockets
 
+  def removeRocket(id: Int): Unit =
+    rockets = rockets.filterNot(_.rID == id)
+
   def listRockets(): Seq[String] =
     if rockets.isEmpty then
       Seq.empty
@@ -111,7 +114,7 @@ object RocketManager:
             |Dry Mass: ${r.dryMassKg} kg
             |Fuel: ${r.fuelMassKg} kg
             |Total Mass: ${r.totalMass} kg
-            |――――――――――――――――――――""".stripMargin
+            |―――――――――――――――――――――――――""".stripMargin
       }
 
   def getAllRockets(): Seq[Rocket] = rockets
